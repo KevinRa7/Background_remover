@@ -43,7 +43,7 @@ def refine_edges(output_image):
 
     return Image.fromarray(arr)
 
-def remove_background_from_url(image_url, output_path="output/output.png"):
+def remove_background_from_url(image_url, output_path="output/output.png", bg_color=None):
     """Remove background from image downloaded via URL."""
     if not is_supported(image_url):
         print(f"[URL] Unsupported file type: {image_url}")
@@ -68,13 +68,25 @@ def remove_background_from_url(image_url, output_path="output/output.png"):
 
         # Ensure output directory exists
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        output_image.save(output_path, "PNG")
 
-        print(f"[URL] Background removed successfully. Saved at: {output_path}")
+        if bg_color:
+            # Create a new image with the specified background color
+            background = Image.new("RGB", output_image.size, bg_color)
+            # Paste the foreground onto the background
+            background.paste(output_image, (0, 0), output_image)
+            # Save as JPEG, updating the output path
+            output_path_jpg = os.path.splitext(output_path)[0] + ".jpg"
+            background.save(output_path_jpg, "JPEG")
+            print(f"[URL] Background replaced successfully. Saved at: {output_path_jpg}")
+        else:
+            # Save with transparent background
+            output_image.save(output_path, "PNG")
+            print(f"[URL] Background removed successfully. Saved at: {output_path}")
+
     except Exception as e:
         print(f"[URL] Error: {e}")
 
-def remove_background_from_file(input_path, output_path="output/output.png"):
+def remove_background_from_file(input_path, output_path="output/output.png", bg_color=None):
     """Remove background from a local file."""
     if not is_supported(input_path):
         print(f"[FILE] Unsupported file type: {input_path}")
@@ -97,17 +109,29 @@ def remove_background_from_file(input_path, output_path="output/output.png"):
 
         # Ensure output directory exists
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        output_image.save(output_path, "PNG")
 
-        print(f"[FILE] Background removed successfully. Saved at: {output_path}")
+        if bg_color:
+            # Create a new image with the specified background color
+            background = Image.new("RGB", output_image.size, bg_color)
+            # Paste the foreground onto the background
+            background.paste(output_image, (0, 0), output_image)
+            # Save as JPEG, updating the output path
+            output_path_jpg = os.path.splitext(output_path)[0] + ".jpg"
+            background.save(output_path_jpg, "JPEG")
+            print(f"[FILE] Background replaced successfully. Saved at: {output_path_jpg}")
+        else:
+            # Save with transparent background
+            output_image.save(output_path, "PNG")
+            print(f"[FILE] Background removed successfully. Saved at: {output_path}")
+
     except Exception as e:
         print(f"[FILE] Error: {e}")
 
 if __name__ == "__main__":
-    # Example for local file
-    test_file = r"E:\Passport_Photograph.jpg"
-    remove_background_from_file(test_file, "output/final_result.png")
+    # Example for local file with transparent background
+    print("--- Processing image with transparent background ---")
+    remove_background_from_file("test_image.png", "output/transparent_result.png")
 
-    # Example for URL (optional)
-    # test_url = "https://example.com/sample.jpg"
-    # remove_background_from_url(test_url, "output/url_result.png")
+    # Example for local file with a blue background
+    print("\n--- Processing image with blue background ---")
+    remove_background_from_file("test_image.png", "output/blue_bg_result.png", bg_color="blue")
